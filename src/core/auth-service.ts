@@ -1,9 +1,8 @@
-
 import type { User } from '@/types';
 import { DEFAULT_USERS, DEFAULT_ROOT_PASSWORD } from '@/config';
 
-const SESSION_KEY = 'noodlix_user_session'; // Changed from webnix_user_session
-const USERS_DB_KEY = 'noodlix_users'; // Changed from webnix_users
+const SESSION_KEY = 'noodlix_user_session';
+const USERS_DB_KEY = 'noodlix_users';
 
 export class AuthService {
   private users: User[];
@@ -48,7 +47,7 @@ export class AuthService {
     if (user.password === password_plaintext) {
       const sessionUser = { ...user, lastLogin: new Date() };
       if (this.isClient) {
-        localStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser));
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser));
       }
       return sessionUser;
     }
@@ -57,13 +56,13 @@ export class AuthService {
 
   logout(): void {
     if (this.isClient) {
-      localStorage.removeItem(SESSION_KEY);
+      sessionStorage.removeItem(SESSION_KEY);
     }
   }
 
   getCurrentUser(): User | null {
     if (this.isClient) {
-      const sessionData = localStorage.getItem(SESSION_KEY);
+      const sessionData = sessionStorage.getItem(SESSION_KEY);
       if (sessionData) {
         return JSON.parse(sessionData) as User;
       }
@@ -91,14 +90,9 @@ export class AuthService {
   }
 
   deleteUser(username: string): boolean {
-    const userIndex = this.users.findIndex(u => u.username === username);
-    if (userIndex === -1) {
-      return false; // User not found
-    }
-    if (username === 'root') {
-        return false; // Cannot delete root user
-    }
-    this.users.splice(userIndex, 1);
+    const index = this.users.findIndex(u => u.username === username);
+    if (index === -1) return false;
+    this.users.splice(index, 1);
     this.saveUsersToStorage();
     return true;
   }

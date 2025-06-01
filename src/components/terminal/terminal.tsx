@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback, KeyboardEvent } from 'react';
@@ -14,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input'; // For browser mode input
 import { ScrollArea } from '@/components/ui/scroll-area'; // For browser content
 import { Loader2 } from 'lucide-react';
+import { generateUUID } from '@/lib/utils';
 
 
 const MAX_HISTORY = 50;
@@ -66,7 +66,7 @@ const Terminal: React.FC = () => {
       setShellProcessor(newShellProcessor);
       
       const welcomeMessages = fileSystem.getWelcomeMessage();
-      const initialOutput: OutputLine[] = welcomeMessages.map(text => ({ id: crypto.randomUUID(), text }));
+      const initialOutput: OutputLine[] = welcomeMessages.map(text => ({ id: generateUUID(), text }));
       setOutputLines(initialOutput);
       setCurrentPrompt(fileSystem.getPrompt(user));
     }
@@ -84,7 +84,7 @@ const Terminal: React.FC = () => {
   }, [isEditingFile, isBrowsing, isBrowserPageLoading]); 
 
   const addOutputLine = useCallback((line: Partial<OutputLine> & { text: string | string[] }) => {
-    setOutputLines(prev => [...prev, { id: crypto.randomUUID(), ...line }]);
+    setOutputLines(prev => [...prev, { id: generateUUID(), ...line }]);
   }, []);
 
   const loadFileForEditing = useCallback(async (filePath: string) => {
@@ -270,9 +270,9 @@ const Terminal: React.FC = () => {
       setIsLoadingCommand(false); // Ensure loading is stopped after clear
     } else if (result === '__LOGOUT__') {
       authLogout();
+      sessionStorage.removeItem('noodlix_user_session');
       localStorage.removeItem('noodlix_filesystem'); 
       localStorage.removeItem('noodlix_users');
-      localStorage.removeItem('noodlix_user_session');
       // isLoadingCommand will be implicitly false on redirect or page change
     } else if (typeof result === 'string' && result.startsWith('__NOTE_EDIT__')) {
         try {
